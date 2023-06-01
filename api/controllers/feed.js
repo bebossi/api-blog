@@ -1,5 +1,7 @@
 const database = require("../models");
 const AuthController = require("../controllers/auth.js");
+const DataLoader = require("dataloader");
+const { Op } = require("sequelize");
 
 class FeedController {
   static async createPost({ userId, title, content, imageUrl }) {
@@ -16,24 +18,6 @@ class FeedController {
       console.log(err);
     }
   }
-
-  // static async getPost(req, res, id) {
-  //   try {
-  //     const { postId } = req.body;
-
-  //     const post = await database.Post.findOne({
-  //       where: { id: postId },
-  //       include: {
-  //         model: database.User,
-  //         attributes: ["id", "firstName", "lastName", "email"],
-  //       },
-  //     });
-
-  //     return post || res.status(200).json(post);
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
 
   static async getPostById(id) {
     try {
@@ -59,6 +43,7 @@ class FeedController {
           model: database.User,
           attributes: ["id", "firstName", "lastName", "email"],
         },
+        order: [["createdAt", "DESC"]],
       });
 
       return posts || res.status(200).json(posts);
@@ -117,6 +102,22 @@ class FeedController {
     } catch (err) {
       console.log(err);
     }
+  }
+
+  static postLoader = new DataLoader(async (ids) => {
+    const posts = await database.Post.findAll({ where: { userId: ids } });
+    return ids.map((id) => {
+      return posts.filter((post) => post.userId === id);
+    });
+  });
+
+  static async createPostLoader() {
+    return new DataLoader(async (ids) => {
+      const posts = await database.Post.findAll({ where: { userId: ids } });
+      return ids.map((id) => {
+        return posts.filter((post) => post.userId === id);
+      });
+    });
   }
 }
 

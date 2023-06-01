@@ -17,7 +17,7 @@ const resolvers = {
     users: async () => {
       const users = await AuthController.getUsers();
       if (!users) {
-        throw notFoundError("No user found with id " + id);
+        throw notFoundError("No user found with id ");
       }
       return users;
     },
@@ -97,9 +97,17 @@ const resolvers = {
   },
 
   User: {
-    posts: async ({ id }) => {
-      const profilePosts = await FeedController.profilePosts(id);
-      return profilePosts;
+    // posts: async ({ id }) => {
+    //   const profilePosts = await FeedController.profilePosts(id);
+    //   return profilePosts;
+    // },
+    // posts: async (user) => {
+    //   const posts = await FeedController.postLoader.load(user.id);
+    //   return posts;
+    // },
+    posts: async (user, _args, { postLoader }) => {
+      const posts = await FeedController.postLoader.load(user.id);
+      return posts;
     },
   },
   Post: {

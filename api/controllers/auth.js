@@ -51,10 +51,10 @@ class AuthController {
     }
   }
 
-  static async getUsers(req, res) {
+  static async getUsers() {
     try {
       const users = await database.User.findAll();
-      return users || res.status(200).json(users);
+      return users;
     } catch (err) {
       console.log(err);
     }
