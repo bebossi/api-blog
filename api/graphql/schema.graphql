@@ -10,6 +10,15 @@ type Mutation {
   createPost(input: CreatePostInput!): Post
   deletePost(id: ID!): Post
   updatePost(input: UpdatePostInput!): Post
+  createComment(input: CreateCommentInput!): Comment
+  updateComment(input: UpdateCommentInput!): Comment
+}
+
+type Comment {
+  id: ID!
+  comment: String!
+  user: User!
+  post: Post!
 }
 
 type Post {
@@ -18,6 +27,7 @@ type Post {
   content: String!
   imageUrl: String
   user: User!
+  comments: [Comment!]
 }
 
 type User {
@@ -40,4 +50,14 @@ input UpdatePostInput {
   title: String!
   content: String!
   imageUrl: String!
+}
+
+input CreateCommentInput {
+  comment: String!
+  post: ID!
+}
+
+input UpdateCommentInput {
+  id: ID!
+  comment: String!
 }

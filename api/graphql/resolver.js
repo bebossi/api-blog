@@ -94,17 +94,30 @@ const resolvers = {
       }
       return post;
     },
+
+    createComment: async (_root, { input: { comment, postId } }, { user }) => {
+      if (!user) {
+        throw unauthorizedError("Missing authentication");
+      }
+
+      const CreatedComment = await FeedController.createComment({
+        userId: user.id,
+        comment,
+        postId: 54,
+      });
+      return CreatedComment;
+    },
+
+    updateComment: async (_root, { input: { commentId, postId } }) => {
+      const updateComment = await FeedController.updateComment(
+        commentId,
+        postId
+      );
+      return updateComment;
+    },
   },
 
   User: {
-    // posts: async ({ id }) => {
-    //   const profilePosts = await FeedController.profilePosts(id);
-    //   return profilePosts;
-    // },
-    // posts: async (user) => {
-    //   const posts = await FeedController.postLoader.load(user.id);
-    //   return posts;
-    // },
     posts: async (user, _args, { postLoader }) => {
       const posts = await FeedController.postLoader.load(user.id);
       return posts;
@@ -113,6 +126,14 @@ const resolvers = {
   Post: {
     user: (post) => {
       return post.User;
+    },
+
+    comments: async (post) => {
+      const comments = await FeedController.getCommentsByPost({
+        postId: post.id,
+      });
+
+      return comments;
     },
   },
 };

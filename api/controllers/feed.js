@@ -39,10 +39,15 @@ class FeedController {
   static async getPosts(req, res) {
     try {
       const posts = await database.Post.findAll({
-        include: {
-          model: database.User,
-          attributes: ["id", "firstName", "lastName", "email"],
-        },
+        include: [
+          {
+            model: database.User,
+            attributes: ["id", "firstName", "lastName", "email"],
+          },
+          {
+            model: database.Comment,
+          },
+        ],
         order: [["createdAt", "DESC"]],
       });
 
@@ -99,6 +104,44 @@ class FeedController {
       });
 
       return deletedPost;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  static async createComment({ comment, userId, postId }) {
+    const CreatedComment = await database.Comment.create({
+      comment: comment,
+      userId: userId,
+      postId: postId,
+    });
+    return CreatedComment;
+  }
+
+  static async updateComment({ comment, userId, postId, commentId }) {
+    const newInfo = { comment };
+    await database.Comment.update(newInfo, {
+      where: { id: commentId },
+    });
+
+    const updatedpost = await database.Comment.findOne({
+      where: { id: commentId },
+    });
+
+    return updatedpost;
+  }
+
+  static async getCommentsByPost({ postId }) {
+    try {
+      const post = await database.Post.findOne({
+        where: { id: postId },
+      });
+
+      const comments = await database.Comment.findAll({
+        where: { postId: postId },
+      });
+
+      return comments;
     } catch (err) {
       console.log(err);
     }
