@@ -118,17 +118,33 @@ class FeedController {
     return CreatedComment;
   }
 
-  static async updateComment({ comment, userId, postId, commentId }) {
+  static async updateComment({ comment, userId, id }) {
     const newInfo = { comment };
     await database.Comment.update(newInfo, {
-      where: { id: commentId },
+      where: { id: id, userId: userId },
     });
 
-    const updatedpost = await database.Comment.findOne({
-      where: { id: commentId },
+    const updatedComment = await database.Comment.findOne({
+      where: { id: id },
     });
 
-    return updatedpost;
+    return updatedComment;
+  }
+
+  static async deleteComment(id, userId) {
+    try {
+      const comment = await database.Comment.findOne({
+        where: { id: id, userId: userId },
+      });
+
+      await database.Comment.destroy({
+        where: { id: id, userId: userId },
+      });
+
+      return comment;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   static async getCommentsByPost({ postId }) {

@@ -12,6 +12,7 @@ type Mutation {
   updatePost(input: UpdatePostInput!): Post
   createComment(input: CreateCommentInput!): Comment
   updateComment(input: UpdateCommentInput!): Comment
+  deleteComment(id: ID!): Comment
 }
 
 type Comment {

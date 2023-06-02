@@ -108,12 +108,25 @@ const resolvers = {
       return CreatedComment;
     },
 
-    updateComment: async (_root, { input: { commentId, postId } }) => {
-      const updateComment = await FeedController.updateComment(
-        commentId,
-        postId
-      );
+    updateComment: async (_root, { input: { id, comment } }, { user }) => {
+      const updateComment = await FeedController.updateComment({
+        id: id,
+        comment: comment,
+        userId: user.id,
+      });
       return updateComment;
+    },
+
+    deleteComment: async (_root, { id, userId }, { user }) => {
+      if (!user) {
+        throw unauthorizedError("Missing authentication");
+      }
+      const comment = await FeedController.deleteComment(id, user.id);
+
+      if (!comment) {
+        throw notFoundError("Comment not found");
+      }
+      return comment;
     },
   },
 
