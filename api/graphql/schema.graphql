@@ -13,6 +13,12 @@ type Mutation {
   createComment(input: CreateCommentInput!): Comment
   updateComment(input: UpdateCommentInput!): Comment
   deleteComment(id: ID!): Comment
+  followUser(followingId: ID!): FollowUser
+}
+
+type FollowUser {
+  followingId: ID!
+  followerId: ID!
 }
 
 type Comment {

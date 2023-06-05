@@ -1,6 +1,8 @@
 const database = require("../models/index.js");
 const FeedController = require("../controllers/feed.js");
 const AuthController = require("../controllers/auth.js");
+const FollowController = require("../controllers/follow.js");
+
 const { ApolloError } = require("apollo-server");
 const isAuth = require("../middleware/isAuth");
 
@@ -127,6 +129,14 @@ const resolvers = {
         throw notFoundError("Comment not found");
       }
       return comment;
+    },
+
+    followUser: async (_root, { followerId, followingId }, { user }) => {
+      const followUser = await FollowController.followUser(
+        user.id,
+        followingId
+      );
+      return followUser;
     },
   },
 
