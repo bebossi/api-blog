@@ -14,6 +14,7 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): Comment
   deleteComment(id: ID!): Comment
   followUser(followingId: ID!): FollowUser
+  unfollowUser(followingId: ID!): FollowUser
 }
 
 type FollowUser {

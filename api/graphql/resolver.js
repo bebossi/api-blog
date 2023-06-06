@@ -138,6 +138,19 @@ const resolvers = {
       );
       return followUser;
     },
+
+    unfollowUser: async (_root, { followerId, followingId }, { user }) => {
+      const unfollowUser = await FollowController.unfollowUser(
+        user.id,
+        followingId
+      );
+
+      return {
+        followerId: user.id,
+        followingId: followingId,
+        message: unfollowUser.message,
+      };
+    },
   },
 
   User: {
@@ -155,7 +168,6 @@ const resolvers = {
       const comments = await FeedController.getCommentsByPost({
         postId: post.id,
       });
-
       return comments;
     },
   },
