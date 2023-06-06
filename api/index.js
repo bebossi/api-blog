@@ -8,6 +8,10 @@ const routes = require("./routes/routes.js");
 const { expressjwt } = require("express-jwt");
 const AuthController = require("./controllers/auth.js");
 const { createPostLoader } = require("./controllers/feed.js");
+const { WebSocketServer } = require("ws");
+const { createServer: createHttpServer } = require("node:http");
+const { useServer: useWsServer } = require("graphql-ws/lib/use/ws");
+const { makeExecutableSchema } = require("@graphql-tools/schema");
 
 const app = express();
 app.use(cors(), express.json());
@@ -41,10 +45,19 @@ async function startServer() {
     }
     return authMiddleware(req, res, next);
   });
+  const schema = makeExecutableSchema({ typeDefs, resolvers });
 
   app.use("/graphql", expressMiddleware(server, { context: getContext }));
 
-  app.listen(8080, () => {
+  const httpServer = createHttpServer(app);
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: "/graphql",
+  });
+
+  useWsServer({ schema }, wsServer);
+
+  httpServer.listen(8080, () => {
     console.log(`🚀 Server ready at http://localhost:8080/graphql`);
   });
 }

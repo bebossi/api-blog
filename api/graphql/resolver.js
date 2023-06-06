@@ -2,9 +2,12 @@ const database = require("../models/index.js");
 const FeedController = require("../controllers/feed.js");
 const AuthController = require("../controllers/auth.js");
 const FollowController = require("../controllers/follow.js");
-
+const MessageController = require("../controllers/message.js");
 const { ApolloError } = require("apollo-server");
 const isAuth = require("../middleware/isAuth");
+const { PubSub } = require("graphql-subscriptions");
+
+const pubSub = new PubSub();
 
 const resolvers = {
   Query: {
@@ -40,6 +43,14 @@ const resolvers = {
     posts: async () => {
       const posts = await FeedController.getPosts();
       return posts;
+    },
+
+    messages: (_root, _args, { user }) => {
+      if (!user) {
+        throw unauthorizedError("No user");
+      }
+      const messages = MessageController.getMessages();
+      return messages;
     },
   },
 
@@ -150,6 +161,25 @@ const resolvers = {
         followingId: followingId,
         message: unfollowUser.message,
       };
+    },
+
+    addMessage: async (_root, { content, recipientId }, { user }) => {
+      if (!user) {
+        throw unauthorizedError("No user");
+      }
+      const message = await MessageController.createMessage(
+        user.id,
+        recipientId,
+        content
+      );
+      pubSub.publish("MESSAGE_ADDED", { messageAdded: message });
+      return message;
+    },
+  },
+
+  Subscription: {
+    messageAdded: {
+      subscribe: () => pubSub.asyncIterator("MESSAGE_ADDED"),
     },
   },
 

@@ -4,6 +4,7 @@ type Query {
   post(id: ID!): Post
   users: [User]
   profile(id: ID!): [Post]
+  messages: [Message!]
 }
 
 type Mutation {
@@ -15,11 +16,23 @@ type Mutation {
   deleteComment(id: ID!): Comment
   followUser(followingId: ID!): FollowUser
   unfollowUser(followingId: ID!): FollowUser
+  addMessage(recipientId: ID!, content: String!): Message
+}
+
+type Subscription {
+  messageAdded: Message
 }
 
 type FollowUser {
   followingId: ID!
   followerId: ID!
+}
+
+type Message {
+  id: ID!
+  senderId: ID!
+  recipientId: ID!
+  content: String!
 }
 
 type Comment {
