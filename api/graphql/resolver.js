@@ -6,12 +6,13 @@ const MessageController = require("../controllers/message.js");
 const { ApolloError } = require("apollo-server");
 const isAuth = require("../middleware/isAuth");
 const { PubSub } = require("graphql-subscriptions");
+const { v4: uuidv4 } = require("uuid");
 
 const pubSub = new PubSub();
 
 const resolvers = {
   Query: {
-    user: async (_, { id }) => {
+    user: async (_root, { id }) => {
       const user = await AuthController.getUser(id);
       if (!user) {
         throw notFoundError("No user found with id " + id);
@@ -116,7 +117,7 @@ const resolvers = {
       const CreatedComment = await FeedController.createComment({
         userId: user.id,
         comment,
-        postId: 54,
+        postId: postId,
       });
       return CreatedComment;
     },
@@ -163,17 +164,41 @@ const resolvers = {
       };
     },
 
-    addMessage: async (_root, { content, recipientId }, { user }) => {
+    addMessage: async (_root, { input }, { user }) => {
       if (!user) {
         throw unauthorizedError("No user");
       }
-      const message = await MessageController.createMessage(
+
+      const { recipientId, content } = input;
+
+      const existingChat = await MessageController.findChatBetweenUsers(
         user.id,
-        recipientId,
-        content
+        recipientId
       );
+
+      let chatId;
+      console.log(existingChat.chatId);
+
+      if (existingChat) {
+        chatId = existingChat.chatId;
+      } else {
+        chatId = uuidv4();
+      }
+
+      const message = await MessageController.createMessage({
+        senderId: user.id,
+        recipientId: recipientId,
+        content,
+        chatId: chatId,
+      });
       pubSub.publish("MESSAGE_ADDED", { messageAdded: message });
+
       return message;
+    },
+
+    deleteMessage: async (_root, { id }, { user }) => {
+      const deleteMessage = await MessageController.deleteMessage(id);
+      return { deleteMessage, id };
     },
   },
 

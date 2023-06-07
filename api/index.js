@@ -24,6 +24,7 @@ async function getContext({ req }) {
   if (req.auth) {
     context.user = await AuthController.getUser(req.auth.id);
   }
+
   return context;
 }
 

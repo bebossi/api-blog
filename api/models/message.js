@@ -1,5 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
+const { v4: uuidv4 } = require("uuid");
+
 module.exports = (sequelize, DataTypes) => {
   class Message extends Model {
     /**
@@ -21,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
   Message.init(
     {
       content: DataTypes.STRING,
+      chatId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        defaultValue: uuidv4(),
+      },
     },
     {
       sequelize,

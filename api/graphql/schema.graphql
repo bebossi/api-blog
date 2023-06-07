@@ -16,11 +16,37 @@ type Mutation {
   deleteComment(id: ID!): Comment
   followUser(followingId: ID!): FollowUser
   unfollowUser(followingId: ID!): FollowUser
-  addMessage(recipientId: ID!, content: String!): Message
+  addMessage(input: AddMessageInput!): Message
+  deleteMessage(id: ID!): Message
 }
 
 type Subscription {
   messageAdded: Message
+}
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  posts: [Post!]
+}
+
+type Post {
+  id: ID!
+  title: String!
+  content: String!
+  imageUrl: String
+  user: User!
+  comments: [Comment!]
+}
+
+type Comment {
+  id: ID!
+  comment: String!
+  user: User!
+  post: Post!
 }
 
 type FollowUser {
@@ -33,31 +59,6 @@ type Message {
   senderId: ID!
   recipientId: ID!
   content: String!
-}
-
-type Comment {
-  id: ID!
-  comment: String!
-  user: User!
-  post: Post!
-}
-
-type Post {
-  id: ID!
-  title: String!
-  content: String!
-  imageUrl: String
-  user: User!
-  comments: [Comment!]
-}
-
-type User {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-  posts: [Post!]
 }
 
 input CreatePostInput {
@@ -75,10 +76,16 @@ input UpdatePostInput {
 
 input CreateCommentInput {
   comment: String!
-  post: ID!
+  postId: ID!
 }
 
 input UpdateCommentInput {
   id: ID!
   comment: String!
+}
+
+input AddMessageInput {
+  chatId: ID!
+  recipientId: ID!
+  content: String!
 }
